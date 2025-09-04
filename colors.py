@@ -21,7 +21,10 @@ PURPLE1: tuple[int, int, int] = (128, 0, 128)
 PURPLE2: tuple[int, int, int] = (172, 105, 255)
 PURPLE3: tuple[int, int, int] = (56, 0, 128)
 
-colors: list[tuple[int, int, int]] = [
+DARK_GRAY: tuple[int, int, int] = (48, 48, 48)
+GRID_LINES_COLOR: tuple[int, int, int] = (16, 16, 16)
+
+block_colors: list[tuple[int, int, int]] = [
     RED1, RED2, RED3,
     GREEN1, GREEN2, GREEN3,
     BLUE1, BLUE2, BLUE3,

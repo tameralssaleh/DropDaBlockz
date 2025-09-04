@@ -1,13 +1,18 @@
 import pygame
 from random import choice
 from square import Square
-from colors import colors
+from colors import block_colors
 
 class Block:
     def __init__(self, squares: list[Square], color: tuple[int, int, int] = None) -> "Block":
         # color will be None initially.. will be set later during runtime.
         self.squares: list[Square] = squares
         self.color: tuple[int, int, int] = color
+        self.can_move: bool = True
+        self.is_falling: bool = True
+        self.fast_falling: bool = False
+        self.can_fall: bool = True
+        self.is_settled: bool = False
         for square in self.squares:
             square.color = self.color
 
@@ -22,6 +27,10 @@ class Block:
     def move_left(self, velocity: int) -> None:
         for square in self.squares:
             square.x -= velocity
+
+    def move_down(self, velocity: int) -> None:
+        for square in self.squares:
+            square.y += velocity
 
 # Upside-down stair shape
 block_squares_one: list[Square] = [
