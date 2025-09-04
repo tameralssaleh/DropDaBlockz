@@ -32,11 +32,11 @@ class Block:
         for square in self.squares:
             square.y += velocity
 
-# Upside-down stair shape
 block_squares_one: list[Square] = [
     Square(300, 0),
-    Square(300, 30),
-    Square(330, 0)
+    Square(270, 0),
+    Square(330, 0),
+    Square(300, 30)
 ]
 
 # 1x4 bar shape
@@ -62,4 +62,30 @@ block_squares_four: list[Square] = [
     Square(330, 60)
 ]
 
-block_squares: list[Square] = [block_squares_one, block_squares_two, block_squares_three, block_squares_four]
+block_squares_five: list[Square] = [
+    Square(300, 30),
+    Square(270, 30),
+    Square(330, 30),
+    Square(300, 0)
+]
+
+block_squares_six: list[Square] = [
+    Square(300, 0),
+    Square(300, 30),
+    Square(330, 30),
+    Square(330, 60)
+]
+
+block_squares_seven: list[Square] = [
+    Square(330, 0),
+    Square(330, 30),
+    Square(300, 30),
+    Square(300, 60)
+]
+ 
+block_squares: list[Square] = [
+    block_squares_one, block_squares_two, 
+    block_squares_three, block_squares_four,
+    block_squares_five, block_squares_six,
+    block_squares_seven
+]

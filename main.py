@@ -105,11 +105,11 @@ while running:
 
     # Handle left/right movement
     if keys[pygame.K_LEFT] or keys[pygame.K_a]:
-        if can_move_left(current_block):
+        if can_move_left(current_block) and frame_count % 4 == 0:
             current_block.move_left(VELOCITY)
 
     if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-        if can_move_right(current_block):
+        if can_move_right(current_block) and frame_count % 4 == 0: 
             current_block.move_right(VELOCITY)
 
     # Handle fast-fall
