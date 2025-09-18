@@ -33,54 +33,54 @@ class Block:
             square.y += velocity
 
 block_squares_one: list[Square] = [
-    Square(300, 0),
-    Square(270, 0),
-    Square(330, 0),
-    Square(300, 30)
+    Square(5, 0),
+    Square(4, 0),
+    Square(6, 0),
+    Square(5, 1)
 ]
 
 # 1x4 bar shape
 block_squares_two: list[Square] = [
-    Square(300, 0),
-    Square(330, 0),
-    Square(360, 0),
-    Square(390, 0)
+    Square(5, 0),
+    Square(6, 0),
+    Square(7, 0),
+    Square(8, 0)
 ]
 
 # 2x2 square shape
 block_squares_three: list[Square] = [
-    Square(300, 0),
-    Square(300, 30),
-    Square(330, 0),
-    Square(330, 30)
+    Square(5, 0),
+    Square(5, 1),
+    Square(6, 0),
+    Square(6, 1)
 ]
 # L shape
 block_squares_four: list[Square] = [
-    Square(300, 0),
-    Square(300, 30),
-    Square(300, 60),
-    Square(330, 60)
+    Square(5, 0),
+    Square(5, 1),
+    Square(5, 2),
+    Square(6, 2)
 ]
 
 block_squares_five: list[Square] = [
-    Square(300, 30),
-    Square(270, 30),
-    Square(330, 30),
-    Square(300, 0)
+    Square(5, 1),
+    Square(4, 1),
+    Square(6, 1),
+    Square(5, 0)
 ]
 
 block_squares_six: list[Square] = [
-    Square(300, 0),
-    Square(300, 30),
-    Square(330, 30),
-    Square(330, 60)
+    Square(5, 0),
+    Square(5, 1),
+    Square(6, 1),
+    Square(6, 2)
 ]
 
 block_squares_seven: list[Square] = [
-    Square(330, 0),
-    Square(330, 30),
-    Square(300, 30),
-    Square(300, 60)
+    Square(6, 0),
+    Square(6, 1),
+    Square(5, 1),
+    Square(5, 2)
 ]
  
 block_squares: list[Square] = [
