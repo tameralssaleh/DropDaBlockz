@@ -3,6 +3,7 @@ from blocks import Block, block_squares
 from colors import *
 from copy import deepcopy
 from random import choice
+from time import time
 
 class GameStateMachine():
     def __init__(self):
@@ -71,6 +72,8 @@ class GameRunningState(GameState):
         self.y_boundary: tuple[int, int] = None
         self.occupied_positions: set = set()
         self.settled_blocks: list[Block] = []
+        self.press_timer: float = time()
+        self.time_buffer: float = 0.3
 
     def enter(self) -> None:
         pygame.display.set_caption(self.header)
@@ -92,6 +95,9 @@ class GameRunningState(GameState):
             if next_pos[0] > self.x_boundary[1] or next_pos in self.occupied_positions:
                 return False
         return True
+    
+    def can_hard_drop(self, block: Block):
+        pass
 
     def can_move_down(self, block: Block):
         for square in block.squares:
@@ -135,12 +141,13 @@ class GameRunningState(GameState):
         fast_fall = keys[pygame.K_SPACE] or keys[pygame.K_s] or keys[pygame.K_DOWN]
         
         # Move block down
-        if self.frame_count % (1 if fast_fall else 10) == 0:
-            if self.can_move_down(self.current_block):
-                self.current_block.move_down(self.velocity)
-            else:
-                # Block has settled into place
-                self.current_block.is_settled = True   
+        if time() - self.press_timer > self.time_buffer:
+            if self.frame_count % (1 if fast_fall else 10) == 0:
+                if self.can_move_down(self.current_block):
+                    self.current_block.move_down()
+                else:
+                    # Block has settled into place
+                    self.current_block.is_settled = True 
     # Check if blocks have reached top of board
 
         for positions in self.occupied_positions:
@@ -162,18 +169,20 @@ class GameRunningState(GameState):
         self.clock.tick(self.frame_rate)
         self.frame_count += 1
 
-    def handle_events(self, screen) -> None:
-        # Function to keyboard events.
+    def handle_events(self, event: pygame.event.Event) -> None:
+        # Function to manage keyboard events.
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                pass # Enter pause state
+            if event.key == pygame.K_a or event.key == pygame.K_LEFT:
+                if self.can_move_left(self.current_block):
+                    self.current_block.move_left()
+                    self.press_timer = time()  
 
-        keys: pygame.key.ScancodeWrapper = pygame.key.get_pressed()
-        
-        # Handle left/right movement
-        if keys[pygame.K_LEFT] or keys[pygame.K_a]:
-            if self.can_move_left(self.current_block) and self.frame_count % 4 == 0:
-                self.current_block.move_left(self.velocity)
-
-        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-            if self.can_move_right(self.current_block) and self.frame_count % 4 == 0: 
-                self.current_block.move_right(self.velocity)
+            if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
+                if self.can_move_right(self.current_block):
+                    self.current_block.move_right()
+                    self.press_timer = time()    
+                  
 
 

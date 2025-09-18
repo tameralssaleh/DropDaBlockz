@@ -20,15 +20,15 @@ class Block:
         for square in self.squares:
             square.draw(surface)
 
-    def move_right(self, velocity: int) -> None:
+    def move_right(self) -> None:
         for square in self.squares:
             square.x += 1
 
-    def move_left(self, velocity: int) -> None:
+    def move_left(self) -> None:
         for square in self.squares:
             square.x -= 1
 
-    def move_down(self, velocity: int) -> None:
+    def move_down(self) -> None:
         for square in self.squares:
             square.y += 1
 
