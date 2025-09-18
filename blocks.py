@@ -22,15 +22,15 @@ class Block:
 
     def move_right(self, velocity: int) -> None:
         for square in self.squares:
-            square.x += velocity
+            square.x += 1
 
     def move_left(self, velocity: int) -> None:
         for square in self.squares:
-            square.x -= velocity
+            square.x -= 1
 
     def move_down(self, velocity: int) -> None:
         for square in self.squares:
-            square.y += velocity
+            square.y += 1
 
 block_squares_one: list[Square] = [
     Square(5, 0),

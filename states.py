@@ -70,7 +70,7 @@ class GameRunningState(GameState):
         self.x_boundary: tuple[int, int] = None
         self.y_boundary: tuple[int, int] = None
         self.occupied_positions: set = set()
-        self.active_blocks: list[Block] = []
+        self.settled_blocks: list[Block] = []
 
     def enter(self) -> None:
         pygame.display.set_caption(self.header)
@@ -79,45 +79,57 @@ class GameRunningState(GameState):
         current_block = Block(block_squares_list, block_color) 
         self.current_block = current_block
 
-    def can_move_down(self, block: Block):
-        for square in block.squares:
-            next_pos = (square.x, square.y + self.square_size)
-            if next_pos in self.occupied_positions or next_pos[1] >= self.y_boundary[1]:
-                return False
-        return True
-
     def can_move_left(self, block: Block):
         for square in block.squares:
-            next_pos = (square.x - self.square_size, square.y)
+            next_pos = (square.x - 1, square.y)
             if next_pos[0] < self.x_boundary[0] or next_pos in self.occupied_positions:
                 return False
         return True
 
     def can_move_right(self, block: Block):
         for square in block.squares:
-            next_pos = (square.x + self.square_size, square.y)
+            next_pos = (square.x + 1, square.y)
             if next_pos[0] > self.x_boundary[1] or next_pos in self.occupied_positions:
+                return False
+        return True
+
+    def can_move_down(self, block: Block):
+        for square in block.squares:
+            next_pos = (square.x, square.y + 1)
+            # Hit bottom?
+            if next_pos[1] > self.y_boundary[1]:
+                return False
+            # Hit another block?
+            if next_pos in self.occupied_positions:
                 return False
         return True
     
     def render(self, screen: pygame.Surface) -> None:
-        # Fill background
+        # Clear everything
         screen.fill((0, 0, 0))
-        # Draw game board
+        self.game_board.fill((0, 0, 0))  # clear game board too
+
+        # Draw grid lines (on game board first)
+        for x in range(0, self.game_board.get_width(), self.grid_size):
+            pygame.draw.line(self.game_board, GRID_LINES_COLOR, (x, 0), (x, self.game_board.get_height()))
+        for y in range(0, self.game_board.get_height(), self.grid_size):
+            pygame.draw.line(self.game_board, GRID_LINES_COLOR, (0, y), (self.game_board.get_width(), y))
+
+        # Draw settled blocks
+        for block in self.settled_blocks:
+            block.draw(self.game_board)
+
+        # Draw current falling block
+        if self.current_block:
+            self.current_block.draw(self.game_board)
+
         screen.blit(self.game_board, self.game_board_location)
-        # Draw grid lines
-        for x in range(0, self.screen_width, self.grid_size):
-            pygame.draw.line(self.game_board, GRID_LINES_COLOR, (x, 0), (x, self.screen_height))
-        for y in range(0, self.screen_height, self.grid_size):
-            pygame.draw.line(self.game_board, GRID_LINES_COLOR, (0, y), (self.screen_width, y))
+
         # Draw sidebars
         pygame.draw.rect(screen, DARK_GRAY, (0, 0, 150, self.screen_height))  # Left Sidebar
         pygame.draw.rect(screen, DARK_GRAY, (self.screen_width - 150, 0, 150, self.screen_height))  # Right Sidebar
 
     def update(self, screen) -> None:
-
-        self.render(screen)
-
         # Handle fast-fall
         keys: pygame.key.ScancodeWrapper = pygame.key.get_pressed()
         fast_fall = keys[pygame.K_SPACE] or keys[pygame.K_s] or keys[pygame.K_DOWN]
@@ -141,21 +153,11 @@ class GameRunningState(GameState):
         if self.current_block.is_settled:
             for square in self.current_block.squares:
                 self.occupied_positions.add((square.x, square.y))
-            self.active_blocks.append(self.current_block)
+            self.settled_blocks.append(self.current_block)
             # Make new block
             block_color = deepcopy(choice(block_colors))
             block_squares_list = deepcopy(choice(block_squares))
             self.current_block = Block(block_squares_list, block_color)
-
-        # Draw all active blocks that had reached the bottom
-        for block in self.active_blocks:
-            block.draw(self.game_board)
-
-        # Display block/tetromino
-        self.current_block.draw(self.game_board)
-
-        # Update display
-        pygame.display.flip()
 
         self.clock.tick(self.frame_rate)
         self.frame_count += 1
