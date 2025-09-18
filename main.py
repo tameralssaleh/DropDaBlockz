@@ -63,7 +63,8 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    grs.handle_events(window)
+        grs.handle_events(event)
+        
     grs.update(window)
     grs.render(window)
 
