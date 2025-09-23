@@ -65,7 +65,7 @@ while running:
 
         grs.handle_events(event)
         
-    grs.update(window)
+    grs.update()
     grs.render(window)
 
     pygame.display.flip()

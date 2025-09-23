@@ -135,7 +135,7 @@ class GameRunningState(GameState):
         pygame.draw.rect(screen, DARK_GRAY, (0, 0, 150, self.screen_height))  # Left Sidebar
         pygame.draw.rect(screen, DARK_GRAY, (self.screen_width - 150, 0, 150, self.screen_height))  # Right Sidebar
 
-    def update(self, screen) -> None:
+    def update(self) -> None:
         # Handle fast-fall
         keys: pygame.key.ScancodeWrapper = pygame.key.get_pressed()
         fast_fall = keys[pygame.K_SPACE] or keys[pygame.K_s] or keys[pygame.K_DOWN]
@@ -148,6 +148,24 @@ class GameRunningState(GameState):
                 else:
                     # Block has settled into place
                     self.current_block.is_settled = True 
+
+        if keys[pygame.K_a] or keys[pygame.K_LEFT]:
+            if time() - self.press_timer > self.time_buffer:
+                if self.can_move_left(self.current_block):
+                    self.current_block.move_left()
+                    self.press_timer = time()
+
+        if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+            if time() - self.press_timer > self.time_buffer:
+                if self.can_move_right(self.current_block):
+                    self.current_block.move_right()
+                    self.press_timer = time()
+
+        if keys[pygame.K_r]:
+            if time() - self.press_timer > self.time_buffer:
+                self.current_block.rotate()
+                self.press_timer = time()
+
     # Check if blocks have reached top of board
 
         for positions in self.occupied_positions:
@@ -184,5 +202,8 @@ class GameRunningState(GameState):
                     self.current_block.move_right()
                     self.press_timer = time()    
                   
+            if event.key == pygame.K_r:
+                self.current_block.rotate()
+                self.press_timer = time()
 
 

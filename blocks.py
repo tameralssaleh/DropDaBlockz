@@ -32,6 +32,32 @@ class Block:
         for square in self.squares:
             square.y += 1
 
+    def rotate(self) -> None:
+        # General formula for rotating a point (x, y) around a pivot (px, py) by 90 degrees counter-clockwise:
+        # (x', y') = (-y + pivot_x, x + pivot_y)
+
+        xs = [square.x for square in self.squares]
+        ys = [square.y for square in self.squares]
+        median_x = sorted(xs)[len(xs) // 2]
+        median_y = sorted(ys)[len(ys) // 2]
+
+        pivot_x = min(xs, key=lambda x: abs(x - median_x))
+        pivot_y = min(ys, key=lambda y: abs(y - median_y))
+
+        for square in self.squares:
+
+            # Translate to pivot
+            rel_x = square.x - pivot_y
+            rel_y = square.y - pivot_x
+
+            # Rotate 90 degrees counter-clockwise
+            new_x = -rel_y
+            new_y = rel_x
+
+            # Translate back
+            square.x = new_x + pivot_x
+            square.y = new_y + pivot_y
+
 block_squares_one: list[Square] = [
     Square(5, 0),
     Square(4, 0),
