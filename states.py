@@ -83,14 +83,14 @@ class GameRunningState(GameState):
         self.current_block = current_block
 
     def can_move_left(self, block: Block):
-        for square in block.squares:
+        for square in block.squares[0]:
             next_pos = (square.x - 1, square.y)
             if next_pos[0] < self.x_boundary[0] or next_pos in self.occupied_positions:
                 return False
         return True
 
     def can_move_right(self, block: Block):
-        for square in block.squares:
+        for square in block.squares[0]:
             next_pos = (square.x + 1, square.y)
             if next_pos[0] > self.x_boundary[1] or next_pos in self.occupied_positions:
                 return False
@@ -100,7 +100,7 @@ class GameRunningState(GameState):
         pass
 
     def can_move_down(self, block: Block):
-        for square in block.squares:
+        for square in block.squares[0]:
             next_pos = (square.x, square.y + 1)
             # Hit bottom?
             if next_pos[1] > self.y_boundary[1]:
@@ -163,6 +163,8 @@ class GameRunningState(GameState):
 
         if keys[pygame.K_r]:
             if time() - self.press_timer > self.time_buffer:
+                if self.current_block.squares[1] == "Square_Shape":  # 2x2 square shape does not rotate
+                    return
                 self.current_block.rotate()
                 self.press_timer = time()
 
@@ -176,7 +178,7 @@ class GameRunningState(GameState):
                 # Do not set these flags, enter the respective states.
 
         if self.current_block.is_settled:
-            for square in self.current_block.squares:
+            for square in self.current_block.squares[0]:
                 self.occupied_positions.add((square.x, square.y))
             self.settled_blocks.append(self.current_block)
             # Make new block
@@ -203,6 +205,8 @@ class GameRunningState(GameState):
                     self.press_timer = time()    
                   
             if event.key == pygame.K_r:
+                if self.current_block.squares[1] == "Square_Shape":  # 2x2 square shape does not rotate
+                    return
                 self.current_block.rotate()
                 self.press_timer = time()
 
