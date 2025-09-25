@@ -1,9 +1,5 @@
 import pygame
-from states import GameRunningState
-# from random import choice
-# from copy import deepcopy
-# from blocks import block_squares, Block
-# from colors import block_colors, DARK_GRAY, GRID_LINES_COLOR
+from states import GameRunningState 
 
 ###### Game Variables
 

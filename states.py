@@ -72,7 +72,8 @@ class GameRunningState(GameState):
         self.y_boundary: tuple[int, int] = None
         self.occupied_positions: set = set()
         self.settled_blocks: list[Block] = []
-        self.press_timer: float = time()
+        self.gravity_timer: float = time()
+        self.input_timer: float = time()
         self.time_buffer: float = 0.3
 
     def enter(self) -> None:
@@ -109,6 +110,32 @@ class GameRunningState(GameState):
             if next_pos in self.occupied_positions:
                 return False
         return True
+
+    def can_rotate(self, block: Block) -> bool:
+        squares, _ = block.squares
+        pivot = squares[1]   # always the pivot
+
+        block_copy = deepcopy(block)
+        copy_squares, _ = block_copy.squares
+
+        for square in copy_squares:
+            # Translate to pivot
+            rel_x = square.x - pivot.x
+            rel_y = square.y - pivot.y
+
+            # Rotate 90 degrees counter-clockwise
+            rotated_x = -rel_y + pivot.x
+            rotated_y = rel_x + pivot.y
+
+            # Check collisions/bounds
+            if (rotated_x, rotated_y) in self.occupied_positions:
+                return False
+            if rotated_x < self.x_boundary[0] or rotated_x > self.x_boundary[1]:
+                return False
+            if rotated_y < self.y_boundary[0] or rotated_y > self.y_boundary[1]:
+                return False
+
+        return True
     
     def render(self, screen: pygame.Surface) -> None:
         # Clear everything
@@ -141,7 +168,7 @@ class GameRunningState(GameState):
         fast_fall = keys[pygame.K_SPACE] or keys[pygame.K_s] or keys[pygame.K_DOWN]
         
         # Move block down
-        if time() - self.press_timer > self.time_buffer:
+        if time() - self.gravity_timer > self.time_buffer:
             if self.frame_count % (1 if fast_fall else 10) == 0:
                 if self.can_move_down(self.current_block):
                     self.current_block.move_down()
@@ -150,23 +177,24 @@ class GameRunningState(GameState):
                     self.current_block.is_settled = True 
 
         if keys[pygame.K_a] or keys[pygame.K_LEFT]:
-            if time() - self.press_timer > self.time_buffer:
+            if time() - self.input_timer > self.time_buffer:
                 if self.can_move_left(self.current_block):
                     self.current_block.move_left()
-                    self.press_timer = time()
+                    self.input_timer = time()
 
         if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
-            if time() - self.press_timer > self.time_buffer:
+            if time() - self.input_timer > self.time_buffer:
                 if self.can_move_right(self.current_block):
                     self.current_block.move_right()
-                    self.press_timer = time()
+                    self.input_timer = time()
 
         if keys[pygame.K_r]:
-            if time() - self.press_timer > self.time_buffer:
+            if time() - self.input_timer > self.time_buffer:
                 if self.current_block.squares[1] == "Square_Shape":  # 2x2 square shape does not rotate
                     return
-                self.current_block.rotate()
-                self.press_timer = time()
+                if self.can_rotate(self.current_block):
+                    self.current_block.rotate()
+                    self.input_timer = time()
 
     # Check if blocks have reached top of board
 
@@ -197,17 +225,18 @@ class GameRunningState(GameState):
             if event.key == pygame.K_a or event.key == pygame.K_LEFT:
                 if self.can_move_left(self.current_block):
                     self.current_block.move_left()
-                    self.press_timer = time()  
+                    self.input_timer = time()  
 
             if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
                 if self.can_move_right(self.current_block):
                     self.current_block.move_right()
-                    self.press_timer = time()    
+                    self.input_timer = time()    
                   
             if event.key == pygame.K_r:
                 if self.current_block.squares[1] == "Square_Shape":  # 2x2 square shape does not rotate
                     return
-                self.current_block.rotate()
-                self.press_timer = time()
+                if self.can_rotate(self.current_block):
+                    self.current_block.rotate()
+                    self.input_timer = time()
 
 

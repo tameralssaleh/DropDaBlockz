@@ -2,6 +2,7 @@ import pygame
 from random import choice
 from square import Square
 from colors import block_colors
+from copy import deepcopy
 
 class Block:
     def __init__(self, squares: tuple[list[Square], str], color: tuple[int, int, int] = None) -> "Block":
@@ -31,6 +32,9 @@ class Block:
     def move_down(self) -> None:
         for square in self.squares[0]:
             square.y += 1
+
+    def hard_drop(self) -> None:
+        ...
 
     def rotate(self) -> None:
         # General formula for rotating a point (x, y) around a pivot (px, py) by 90 degrees counter-clockwise:
