@@ -1,5 +1,6 @@
 import pygame
 from random import choice
+from game import Game
 from square import Square
 from colors import block_colors
 from copy import deepcopy
@@ -55,6 +56,61 @@ class Block:
             # Translate back
             square.x = new_x + pivot.x
             square.y = new_y + pivot.y
+
+    def can_move_left(self):
+        for square in self.squares[0]:
+            next_pos = (square.x - 1, square.y)
+            if next_pos[0] < Game.get_instance().x_boundary[0] or next_pos in Game.get_instance().gameboard.occupied_positions:
+                return False
+        return True
+
+    def can_move_right(self):
+        for square in self.squares[0]:
+            next_pos = (square.x + 1, square.y)
+            if next_pos[0] > Game.get_instance().x_boundary[1] or next_pos in Game.get_instance().gameboard.occupied_positions:
+                return False
+        return True
+    
+    def can_hard_drop(self):
+        pass
+
+    def can_move_down(self):
+        for square in self.squares[0]:
+            next_pos = (square.x, square.y + 1)
+            # Hit bottom?
+            if next_pos[1] > Game.get_instance().y_boundary[1]:
+                print("Hit bottom")
+                return False
+            # Hit another block?
+            if next_pos in Game.get_instance().gameboard.occupied_positions:
+                print("Hit another block")
+                return False
+        return True
+
+    def can_rotate(self) -> bool:
+        squares, _ = self.squares
+        pivot = squares[1]   # always the pivot
+
+        block_copy = deepcopy(self)
+        copy_squares, _ = block_copy.squares
+
+        for square in copy_squares:
+            # Translate to pivot
+            rel_x = square.x - pivot.x
+            rel_y = square.y - pivot.y
+
+            # Rotate 90 degrees counter-clockwise
+            rotated_x = -rel_y + pivot.x
+            rotated_y = rel_x + pivot.y
+
+            # Check collisions/bounds
+            if (rotated_x, rotated_y) in Game.get_instance().gameboard.occupied_positions:
+                return False
+            if rotated_x < Game.get_instance().x_boundary[0] or rotated_x > Game.get_instance().x_boundary[1]:
+                return False
+            if rotated_y < Game.get_instance().y_boundary[0] or rotated_y > Game.get_instance().y_boundary[1]:
+                return False
+        return True
 
 
 block_squares_one: tuple[list[Square], str] = (
