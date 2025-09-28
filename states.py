@@ -59,10 +59,18 @@ class GameState: # base class for states
         pass
 
 class PauseState(GameState):
+    def __init__(self):
+        self.text = Game.get_instance().lg_font.render("PAUSED", True, '#FFFFFF')
+        self.text_rect = self.text.get_rect(center = Game.get_instance().screen.get_rect().center)
+    
+    def enter(self):
+        Game.get_instance().screen.blit(self.text, self.text_rect)
     def handle_events(self, event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 Game.get_instance().state_machine.change_state(GameRunningState)
+    
+
 
 class TransitionState(GameState):
     def __init__(self):
