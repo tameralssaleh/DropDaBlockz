@@ -115,8 +115,6 @@ class GameRunningState(GameState):
             block_squares_list = deepcopy(choice(block_squares))
             current_block = Block(block_squares_list, block_color) 
             self.current_block = current_block
-
-    
     
     def render(self) -> None:
 
@@ -130,16 +128,13 @@ class GameRunningState(GameState):
         if self.current_block:
             self.current_block.draw(Game.get_instance().gameboard.surface)
 
+        self.current_block.draw_hard_drop()
+
         Game.get_instance().screen.blit(Game.get_instance().gameboard.surface, Game.get_instance().gameboard.rect)
 
     def update(self) -> None:
         # Handle fast-fall
         keys: pygame.key.ScancodeWrapper = pygame.key.get_pressed()
-        fast_fall = keys[pygame.K_SPACE] or keys[pygame.K_s] or keys[pygame.K_DOWN]
-        if fast_fall:
-            self.gravity_buffer = 0.05
-        else:
-            self.gravity_buffer = 0.5
         
 
         if keys[pygame.K_a] or keys[pygame.K_LEFT]:
@@ -169,7 +164,7 @@ class GameRunningState(GameState):
                 # Block has settled into place
                 self.current_block.is_settled = True 
     
-        
+        self.current_block.set_hard_drop_offset()
 
         if self.current_block.is_settled:                    
             print("Block settled")
@@ -192,7 +187,7 @@ class GameRunningState(GameState):
         # Function to manage keyboard events.
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                pass # Enter pause state
+                Game.get_instance().state_machine.change_state(PauseState)
             if event.key == pygame.K_a or event.key == pygame.K_LEFT:
                 if self.current_block.can_move_left():
                     self.current_block.move_left()
@@ -209,8 +204,16 @@ class GameRunningState(GameState):
                 if self.current_block.can_rotate():
                     self.current_block.rotate()
                     self.input_timer = time()
+            
+            if event.key == pygame.K_SPACE:
+                self.current_block.hard_drop()
 
-            if event.key == pygame.K_ESCAPE:
-                Game.get_instance().state_machine.change_state(PauseState)
+            if event.key == pygame.K_s or event.key == pygame.K_DOWN:
+                self.gravity_buffer = 0.05
+
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_s or event.key == pygame.K_DOWN:
+                self.gravity_buffer = 0.5
+
 
 

@@ -8,7 +8,7 @@ class Game:
         self.width = 600
         self.height = 600
         self.square_size = 30
-        self.FPS = 10
+        self.FPS = 60
         self.lg_font = pygame.font.SysFont("Calibri", 58)
         self.md_font = pygame.font.SysFont("Calibri", 32)
         self.sm_font = pygame.font.SysFont("Calibri", 16)

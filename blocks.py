@@ -17,6 +17,7 @@ class Block:
         self.is_settled: bool = False
         for square in self.squares[0]:
             square.color = self.color
+        self.hard_drop_offset: int = 0 # How far the block will fall on hard drop
 
     def draw(self, surface: pygame.Surface) -> None:
         for square in self.squares[0]:
@@ -35,7 +36,9 @@ class Block:
             square.y += 1
 
     def hard_drop(self) -> None:
-        ...
+        for square in self.squares[0]:
+            square.y += self.hard_drop_offset
+        self.is_settled = True
 
     def rotate(self) -> None:
         # General formula for rotating a point (x, y) around a pivot (px, py) by 90 degrees counter-clockwise:
@@ -71,8 +74,33 @@ class Block:
                 return False
         return True
     
-    def can_hard_drop(self):
-        pass
+    def set_hard_drop_offset(self):
+        lowest_square_y = max(square.y for square in self.squares[0])
+        y_offset = 19 - lowest_square_y  # Start from the bottom of the board
+        for offset in range(y_offset + 1):
+            collision = False
+            for square in self.squares[0]:
+                if (square.x, square.y + offset) in Game.get_instance().gameboard.occupied_positions or (square.y + offset) > 19:
+                    collision = True
+                    break
+            if collision:
+                self.hard_drop_offset = offset - 1
+                return
+        self.hard_drop_offset = y_offset
+    
+    def draw_hard_drop(self):
+        for square in self.squares[0]:
+            pygame.draw.rect(
+                Game.get_instance().gameboard.surface,
+                square.color,
+                pygame.Rect(
+                    square.x * Game.get_instance().square_size,
+                    (square.y + self.hard_drop_offset) * Game.get_instance().square_size,
+                    Game.get_instance().square_size,
+                    Game.get_instance().square_size
+                ),
+                1  # Draw only the border
+            )
 
     def can_move_down(self):
         for square in self.squares[0]:
