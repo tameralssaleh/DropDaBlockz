@@ -2,7 +2,7 @@ import pygame
 from blocks import Block, block_squares
 from colors import *
 from copy import deepcopy
-from random import choice
+from random import choice, randint
 from time import time
 from game import Game
 
@@ -119,18 +119,13 @@ class GameRunningState(GameState):
         pygame.display.set_caption(self.header)
         Game.get_instance().screen.fill(DARK_GRAY)
         if not self.current_block:
-            block_color = deepcopy(choice(block_colors))
             block_squares_list = deepcopy(choice(block_squares))
-            current_block = Block(block_squares_list, block_color) 
+            current_block = Block(block_squares_list, randint(1, 7)) # Random color from COLOR_MAP (1-7)
             self.current_block = current_block
     
     def render(self) -> None:
 
-        Game.get_instance().gameboard.draw() # Clearboard/Draw grid
-
-        # Draw settled blocks
-        for block in Game.get_instance().gameboard.settled_blocks:
-            block.draw(Game.get_instance().gameboard.surface)
+        Game.get_instance().gameboard.draw() # Draw gameboard surface grid and settled blocks
 
         # Draw current falling block
         if self.current_block:
@@ -177,18 +172,19 @@ class GameRunningState(GameState):
         if self.current_block.is_settled:                    
             print("Block settled")
             for square in self.current_block.squares[0]:
-                if square.y == 0: # Check if block setteled at top
-                        print(f"Game Over!")
-                        self.current_block = None
-                        Game.get_instance().state_machine.change_state(StartScreen)
-                        return
-                Game.get_instance().gameboard.occupied_positions.add((square.x, square.y))
-                Game.get_instance().gameboard.settled_blocks.append(self.current_block)
-            
+                Game.get_instance().gameboard.unified_grid[square.y][square.x] = self.current_block.color
+                # Game.get_instance().gameboard.occupied_positions.add((square.x, square.y))
+                # Game.get_instance().gameboard.settled_blocks.append(self.current_block)
+            full_rows = Game.get_instance().gameboard.find_full_rows()
+            Game.get_instance().gameboard.clear_rows(full_rows)
             # Make new block
-            block_color = deepcopy(choice(block_colors))
             block_squares_list = deepcopy(choice(block_squares))
-            self.current_block = Block(block_squares_list, block_color)
+            self.current_block = Block(block_squares_list, randint(1, 7)) # Random color from COLOR_MAP (1-7)
+            for square in self.current_block.squares[0]:
+                if Game.get_instance().gameboard.unified_grid[square.y][square.x]:
+                    print("Game Over")
+                    Game.get_instance().state_machine.change_state(StartScreen)
+                    return
             
 
     def handle_events(self, event: pygame.event.Event) -> None:

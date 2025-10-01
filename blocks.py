@@ -2,14 +2,14 @@ import pygame
 from random import choice
 from game import Game
 from square import Square
-from colors import block_colors
+from colors import *
 from copy import deepcopy
 
 class Block:
-    def __init__(self, squares: tuple[list[Square], str], color: tuple[int, int, int] = None) -> "Block":
+    def __init__(self, squares: tuple[list[Square], str], color: int) -> "Block":
         # color will be None initially.. will be set later during runtime.
         self.squares: tuple[list[Square], str] = squares
-        self.color: tuple[int, int, int] = color
+        self.color: int = color
         self.can_move: bool = True
         self.is_falling: bool = True
         self.fast_falling: bool = False
@@ -63,36 +63,36 @@ class Block:
     def can_move_left(self):
         for square in self.squares[0]:
             next_pos = (square.x - 1, square.y)
-            if next_pos[0] < Game.get_instance().x_boundary[0] or next_pos in Game.get_instance().gameboard.occupied_positions:
+            if next_pos[0] < Game.get_instance().x_boundary[0] or Game.get_instance().gameboard.unified_grid[next_pos[1]][next_pos[0]]:
                 return False
         return True
 
     def can_move_right(self):
         for square in self.squares[0]:
             next_pos = (square.x + 1, square.y)
-            if next_pos[0] > Game.get_instance().x_boundary[1] or next_pos in Game.get_instance().gameboard.occupied_positions:
+            if next_pos[0] > Game.get_instance().x_boundary[1] or Game.get_instance().gameboard.unified_grid[next_pos[1]][next_pos[0]]:
                 return False
         return True
     
     def set_hard_drop_offset(self):
         lowest_square_y = max(square.y for square in self.squares[0])
-        y_offset = 19 - lowest_square_y  # Start from the bottom of the board
+        y_offset = 19 - lowest_square_y  # get largest possible offset
         for offset in range(y_offset + 1):
             collision = False
             for square in self.squares[0]:
-                if (square.x, square.y + offset) in Game.get_instance().gameboard.occupied_positions or (square.y + offset) > 19:
+                if Game.get_instance().gameboard.unified_grid[square.y + offset][square.x] or (square.y + offset) > 19:
                     collision = True
                     break
             if collision:
-                self.hard_drop_offset = offset - 1
+                self.hard_drop_offset = offset - 1 # Set to last valid offset
                 return
-        self.hard_drop_offset = y_offset
+        self.hard_drop_offset = y_offset # If no collision, set to max possible offset
     
     def draw_hard_drop(self):
         for square in self.squares[0]:
             pygame.draw.rect(
                 Game.get_instance().gameboard.surface,
-                square.color,
+                COLOR_MAP[square.color],
                 pygame.Rect(
                     square.x * Game.get_instance().square_size,
                     (square.y + self.hard_drop_offset) * Game.get_instance().square_size,
@@ -106,13 +106,13 @@ class Block:
         for square in self.squares[0]:
             next_pos = (square.x, square.y + 1)
             # Hit bottom?
-            if next_pos[1] > Game.get_instance().y_boundary[1]:
+            if next_pos[1] > Game.get_instance().y_boundary[1] or Game.get_instance().gameboard.unified_grid[next_pos[1]][next_pos[0]]:
                 print("Hit bottom")
                 return False
             # Hit another block?
-            if next_pos in Game.get_instance().gameboard.occupied_positions:
-                print("Hit another block")
-                return False
+            # if Game.get_instance().gameboard.unified_grid[next_pos[1]][next_pos[0]]:
+            #     print("Hit another block")
+            #     return False
         return True
 
     def can_rotate(self) -> bool:
@@ -130,9 +130,12 @@ class Block:
             # Rotate 90 degrees counter-clockwise
             rotated_x = -rel_y + pivot.x
             rotated_y = rel_x + pivot.y
-
+            try:
+                cell = Game.get_instance().gameboard.unified_grid[rotated_y][rotated_x]
+            except IndexError:
+                return False
             # Check collisions/bounds
-            if (rotated_x, rotated_y) in Game.get_instance().gameboard.occupied_positions:
+            if cell:
                 return False
             if rotated_x < Game.get_instance().x_boundary[0] or rotated_x > Game.get_instance().x_boundary[1]:
                 return False
