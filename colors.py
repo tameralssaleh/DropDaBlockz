@@ -10,6 +10,17 @@ PURPLE: tuple[int, int, int] = (128, 0, 128)
 DARK_GRAY: tuple[int, int, int] = (48, 48, 48)
 GRID_LINES_COLOR: tuple[int, int, int] = (16, 16, 16)
 
-block_colors: list[tuple[int, int, int]] = [
-    RED, GREEN, BLUE, YELLOW, ORANGE, PINK, PURPLE
-]
+# block_colors: list[tuple[int, int, int]] = [
+#     RED, GREEN, BLUE, YELLOW, ORANGE, PINK, PURPLE
+# ]
+
+COLOR_MAP = {
+    0: (0, 0, 0),          # Empty cell
+    1: RED,
+    2: GREEN,
+    3: BLUE,
+    4: YELLOW,
+    5: ORANGE,
+    6: PINK,
+    7: PURPLE
+}
