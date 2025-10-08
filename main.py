@@ -2,7 +2,6 @@ from states import GameStateMachine
 from game import Game
 from gameboard import GameBoard
 
-
 if __name__ == "__main__":
     state_machine = GameStateMachine() 
     gameboard = GameBoard()

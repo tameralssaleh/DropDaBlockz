@@ -69,8 +69,6 @@ class PauseState(GameState):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 Game.get_instance().state_machine.change_state(GameRunningState)
-    
-
 
 class TransitionState(GameState):
     def __init__(self):
@@ -92,7 +90,6 @@ class StartScreen(GameState):
     def __init__(self):
         self.text = Game.get_instance().lg_font.render("Press SPACE to start", True, '#FFFFFF')
         self.text_rect = self.text.get_rect(center = Game.get_instance().screen.get_rect().center)
-
 
     def enter(self):
         Game.get_instance().screen.fill("#0000FF")
@@ -124,22 +121,18 @@ class GameRunningState(GameState):
             self.current_block = current_block
     
     def render(self) -> None:
-
         Game.get_instance().gameboard.draw() # Draw gameboard surface grid and settled blocks
-
         # Draw current falling block
         if self.current_block:
             self.current_block.draw(Game.get_instance().gameboard.surface)
 
         self.current_block.draw_hard_drop()
-
         Game.get_instance().screen.blit(Game.get_instance().gameboard.surface, Game.get_instance().gameboard.rect)
 
     def update(self) -> None:
         # Handle fast-fall
         keys: pygame.key.ScancodeWrapper = pygame.key.get_pressed()
         
-
         if keys[pygame.K_a] or keys[pygame.K_LEFT]:
             if time() - self.input_timer > self.time_buffer:
                 if self.current_block.can_move_left():
@@ -177,6 +170,8 @@ class GameRunningState(GameState):
                 # Game.get_instance().gameboard.settled_blocks.append(self.current_block)
             full_rows = Game.get_instance().gameboard.find_full_rows()
             Game.get_instance().gameboard.clear_rows(full_rows)
+            Game.get_instance().gameboard.score += 100
+            print(f"Score: {Game.get_instance().gameboard.score}")
             # Make new block
             block_squares_list = deepcopy(choice(block_squares))
             self.current_block = Block(block_squares_list, randint(1, 7)) # Random color from COLOR_MAP (1-7)
@@ -186,7 +181,6 @@ class GameRunningState(GameState):
                     Game.get_instance().state_machine.change_state(StartScreen)
                     return
             
-
     def handle_events(self, event: pygame.event.Event) -> None:
         # Function to manage keyboard events.
         if event.type == pygame.KEYDOWN:

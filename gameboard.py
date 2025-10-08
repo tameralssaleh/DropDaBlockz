@@ -1,13 +1,14 @@
 import pygame
 from colors import *
 
-
 class GameBoard:
     def __init__(self, size=(300,600), midtop=(300,0), cell_size=30):
         self.surface = pygame.Surface(size)
         self.rect = self.surface.get_rect(midtop = midtop)
         self.cell_size = cell_size
         self.unified_grid = [[0 for _ in range(10)] for _ in range(20)] # grid [y][x]
+        self.score: int = 0
+        self.completed_rows: int = 0
         #self.occupied_positions = set()
         #self.settled_blocks = []
 
@@ -47,3 +48,6 @@ class GameBoard:
         for row in rows:
             del self.unified_grid[row]
             self.unified_grid.insert(0, [0 for _ in range(10)])
+            self.score += 1000
+            self.completed_rows += 1
+            print(f"Score: {self.score}, Completed Rows: {self.completed_rows}")
