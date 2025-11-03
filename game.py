@@ -1,15 +1,19 @@
 import pygame
 
 class Game:
-    def __init__(self, state_machine, gameboard):
+    def __init__(self, state_machine, gameboard, controller, block_queue, previewboard):
         pygame.init()
         self.state_machine = state_machine
         self.gameboard = gameboard
+        self.controller = controller
+        self.block_queue = block_queue
+        self.previewboard = previewboard
         self.width = 600
         self.height = 600
         self.square_size = 30
         self.FPS = 60
         self.lg_font = pygame.font.SysFont("Calibri", 58)
+        self.mdlg_font = pygame.font.SysFont("Calibri", 48)
         self.md_font = pygame.font.SysFont("Calibri", 32)
         self.sm_font = pygame.font.SysFont("Calibri", 16)
         self.y_boundary = (0, 19)

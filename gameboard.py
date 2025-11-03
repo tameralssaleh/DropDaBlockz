@@ -1,5 +1,6 @@
 import pygame
 from colors import *
+from game import Game
 
 
 class GameBoard:
@@ -8,12 +9,12 @@ class GameBoard:
         self.rect = self.surface.get_rect(midtop = midtop)
         self.cell_size = cell_size
         self.unified_grid = [[0 for _ in range(10)] for _ in range(20)] # grid [y][x]
-        #self.occupied_positions = set()
-        #self.settled_blocks = []
 
     def draw(self):
         self.surface.fill((0,0,0))
         self.draw_blocks()
+        Game._instance.controller.current_block.draw(self)
+        Game._instance.controller.current_block.draw_drop_preview()
         self.draw_grid()
     
     def draw_grid(self):
@@ -23,6 +24,7 @@ class GameBoard:
             pygame.draw.line(self.surface, GRID_LINES_COLOR, (0, y), (self.rect.width, y))
 
     def draw_blocks(self):
+        self.surface.fill(BLACK)
         for y in range(20):
             for x in range(10):
                 if self.unified_grid[y][x]:
@@ -32,8 +34,6 @@ class GameBoard:
         self.surface.blit(surface,rect)
 
     def clear(self):
-        #self.occupied_positions.clear()
-        #self.settled_blocks.clear()
         self.unified_grid = [[0 for _ in range(10)] for _ in range(20)]
 
     def find_full_rows(self):
@@ -47,3 +47,14 @@ class GameBoard:
         for row in rows:
             del self.unified_grid[row]
             self.unified_grid.insert(0, [0 for _ in range(10)])
+
+    def valid_transform(self, block):
+        for i, row in enumerate(block.rotated_shape()):
+            for j, cell in enumerate(row):
+                if cell:
+                    x, y = block.x + j, block.y + i
+                    if x < 0 or x >= 10 or y >= 20:
+                        return False
+                    if y >= 0 and self.unified_grid[y][x] != 0:
+                        return False
+        return True

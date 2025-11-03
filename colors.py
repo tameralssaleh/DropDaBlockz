@@ -1,4 +1,5 @@
 # Block Colors
+BLACK: tuple[int,int,int] = (0,0,0)
 RED: tuple[int, int, int] = (255, 0, 0)
 GREEN: tuple[int, int, int] = (0, 255, 0)
 BLUE: tuple[int, int, int] = (0, 0, 255)
@@ -10,12 +11,9 @@ PURPLE: tuple[int, int, int] = (128, 0, 128)
 DARK_GRAY: tuple[int, int, int] = (48, 48, 48)
 GRID_LINES_COLOR: tuple[int, int, int] = (16, 16, 16)
 
-# block_colors: list[tuple[int, int, int]] = [
-#     RED, GREEN, BLUE, YELLOW, ORANGE, PINK, PURPLE
-# ]
 
 COLOR_MAP = {
-    0: (0, 0, 0),          # Empty cell
+    0: BLACK,          # Empty cell
     1: RED,
     2: GREEN,
     3: BLUE,
