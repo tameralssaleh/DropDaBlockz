@@ -1,9 +1,7 @@
 import pygame
 from colors import *
-from random import choice, randint
 from time import time
 from game import Game
-from blocks import Block, BlockQueue
 from highscore import add_highscore, load_highscores
 
 class GameStateMachine():
@@ -255,7 +253,7 @@ class GameRunningState(GameState):
                 Game.get_instance().controller.move_block_horizontal(1)
                 self.input_timer = time()    
                   
-            if event.key == pygame.K_UP:
+            if event.key == pygame.K_UP or event.key == pygame.K_w:
                 Game.get_instance().controller.rotate_block()
                 self.input_timer = time()
             
