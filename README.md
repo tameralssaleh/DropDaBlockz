@@ -7,8 +7,10 @@ A Tetris-inspired game written in Python using [pygame](https://www.pygame.org/n
 - Sound design by Jakobie Brown
 - Cover of tetris theme
 ## Version
-0.0.0 (Not playable yet)
+1.0.0 (stable)
 ## Source Code
 Python source code files can be found inside the root directory of this repository.
 ## Disclaimer
 This Tetris-inspired game does not use any assets (i.e. original graphics, audios, etc..) from the real official Tetris in order to comply with copyright and trademark laws.
+## Credits
+Audio was composed by Jakobie Brown.
