@@ -9,7 +9,7 @@ if __name__ == "__main__":
     gameboard = GameBoard()
     controller = BlockController()
     block_queue = BlockQueue()
-    previewboard = GameBoard((60,160), (500, 0), 10)
+    previewboard = GameBoard((60,160), (500, 0), 10, 6, 16)
     game = Game(state_machine, gameboard, controller, block_queue, previewboard)
     state_machine.initialize()
     game.run()

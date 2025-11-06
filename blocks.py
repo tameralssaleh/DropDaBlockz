@@ -16,27 +16,10 @@ SHAPES = [
 
 # For all blocks except I and O
 JLSTZ_KICKS = [(0, 0), (1, 0), (1, 2), (1, -2), (-1, 0), (-1, -2), (-1, 2)]
-# {
-#     (0, 1): [(0, 0), (-1, 0), (-1, 1), (0, -2), (-1, -2)],
-#     (1, 0): [(0, 0), (1, 0), (1, -1), (0, 2), (1, 2)],
-#     (1, 2): [(0, 0), (1, 0), (1, -1), (0, 2), (1, 2)],
-#     (2, 1): [(0, 0), (-1, 0), (-1, 1), (0, -2), (-1, -2)],
-#     (2, 3): [(0, 0), (1, 0), (1, 1), (0, -2), (1, -2)],
-#     (3, 2): [(0, 0), (-1, 0), (-1, -1), (0, 2), (-1, 2)],
-#     (3, 0): [(0, 0), (-1, 0), (-1, -1), (0, 2), (-1, 2)],
-#     (0, 3): [(0, 0), (1, 0), (1, 1), (0, -2), (1, -2)]
-# }
 
 # For I block (different kick data)
 I_KICKS = [(0, 0), (-2, 0), (1, 0), (-2, -1), (1, 2), (1, -2), (-2, 1), (2, 0), (-1, 0), (2, 1), (-1, -2), (-1, 2), (2, -1)]
-    # (1, 0): [(0, 0), (2, 0), (-1, 0), (2, 1), (-1, -2)],
-    # (1, 2): [(0, 0), (-1, 0), (2, 0), (-1, 2), (2, -1)],
-    # (2, 1): [(0, 0), (1, 0), (-2, 0), (1, -2), (-2, 1)], # (-2, -1), (1, 2), (2, 0), (-1, 0), (2, 1), (-1, -2), (-1, 2), (2, -1)
-    # (2, 3): [(0, 0), (2, 0), (-1, 0), (2, 1), (-1, -2)], # (-2, 0), (1, 0), (-2, -1), (1, 2), (1, -2), (-2, 1), (-1, 2), (2, -1)
-    # (3, 2): [(0, 0), (-2, 0), (1, 0), (-2, -1), (1, 2)],
-    # (3, 0): [(0, 0), (1, 0), (-2, 0), (1, -2), (-2, 1)],
-    # (0, 3): [(0, 0), (-1, 0), (2, 0), (-1, 2), (2, -1)]  # (-2, 0), (1, 0), (-2, -1), (1, 2), (1, -2), (-2, 1), (2, 1), (-1, -2)
-#}
+
 
 # Piece class
 class Block:
@@ -70,10 +53,6 @@ class Block:
                 if cell:
                     pygame.draw.rect(board.surface, COLOR_MAP[self.color], ((self.x+j)*board.cell_size, (self.y+i)*board.cell_size, board.cell_size, board.cell_size), 4)
         self.y = y
-
-    @staticmethod
-    def get_new_block():
-        return Block(10 // 2 - 2, 0, choice(SHAPES)) #hard coded Columns: 10
     
     @staticmethod
     def get_shuffled_blocks():
@@ -89,7 +68,7 @@ class BlockQueue:
         next = self.blocks.pop(0)
         if len(self.blocks) < 4:
             self.blocks.extend(Block.get_shuffled_blocks())
-        next.x, next.y = 10//2 - 2, 0
+        next.x, next.y = Game.get_instance().gameboard.columns//2 - 2, 0 #Block start in top middle
         return next
     
     def draw(self, grid):
@@ -108,9 +87,13 @@ class BlockController:
         self.current_block = None
 
     def move_block_horizontal(self, direction):
+        game = Game.get_instance()
         self.current_block.x += direction
-        if not Game._instance.gameboard.valid_transform(self.current_block):
+        if not game.gameboard.valid_transform(self.current_block):
             self.current_block.x -= direction
+            return
+        game.click_sound.play()
+        
     
     def try_move_down(self):
         self.current_block.y += 1
@@ -120,29 +103,31 @@ class BlockController:
         return True
     
     def hard_drop(self):
-        while Game._instance.gameboard.valid_transform(self.current_block):
+        game = Game.get_instance()
+        while game.gameboard.valid_transform(self.current_block):
             self.current_block.y += 1
         self.current_block.y -= 1
+        game.thud_sound.play()
         
     def rotate_block(self, direction=1):
-        """
-        direction: +1 for clockwise, -1 for counterclockwise
-        """
+        #direction: +1 for clockwise, -1 for counterclockwise
+        game = Game.get_instance()
         old_rotation = self.current_block.rotation
         self.current_block.rotation = (self.current_block.rotation + direction) % 4
 
         # Determine which kick table to use
         if self.current_block.shape == SHAPES[0]:  # I-block
-            kicks = I_KICKS#.get((old_rotation, self.current_block.rotation), [(0, 0)])
+            kicks = I_KICKS
         elif self.current_block.shape == SHAPES[3]:  # O-block (no kicks needed)
             kicks = [(0, 0)]
         else:
-            kicks = JLSTZ_KICKS#.get((old_rotation, self.current_block.rotation), [(0, 0)])
+            kicks = JLSTZ_KICKS
 
         for dx, dy in kicks:
             self.current_block.x += dx
             self.current_block.y += dy
-            if Game._instance.gameboard.valid_transform(self.current_block):
+            if game.gameboard.valid_transform(self.current_block):
+                game.woop_sound.play()
                 return True  # Successful rotation
             self.current_block.x -= dx
             self.current_block.y -= dy

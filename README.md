@@ -4,6 +4,8 @@ A Tetris-inspired game written in Python using [pygame](https://www.pygame.org/n
 - Your average Tetris experience.
 - Randomized unique colors and shapes.
 - Any shape can have different colors unlike in offical Tetris where a shape can be remembered by color. This adds a little challenge to the game.
+- Sound design by Jakobie Brown
+- Cover of tetris theme
 ## Version
 0.0.0 (Not playable yet)
 ## Source Code

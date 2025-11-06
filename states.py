@@ -79,7 +79,10 @@ class PauseState(GameState):
         self.text_rect = self.text.get_rect(center = Game.get_instance().screen.get_rect().center)
     
     def enter(self):
-        Game.get_instance().screen.blit(self.text, self.text_rect)
+        game = Game.get_instance()
+        pygame.mixer.pause()
+        pygame.display.set_caption(game.caption + " - Paused")
+        game.screen.blit(self.text, self.text_rect)
 
     def handle_events(self, event):
         if event.type == pygame.KEYDOWN:
@@ -88,27 +91,33 @@ class PauseState(GameState):
             elif event.key == pygame.K_x:
                 Game.get_instance().gameboard.clear()
 
+    def exit(self):
+        pygame.mixer.unpause()
+        pygame.display.set_caption(Game.get_instance().caption + " - Running")
+
 class ConfirmInitials(GameState):
     def enter(self):
-        Game.get_instance().screen.fill(BLACK)
-        text = Game.get_instance().lg_font.render("Press Esc to re-enter", True, '#FFFFFF')
-        text_rect = text.get_rect(midbottom = Game.get_instance().screen.get_rect().center)
-        Game.get_instance().screen.blit(text, text_rect)
-        text = Game.get_instance().lg_font.render("Press Enter to confirm", True, '#FFFFFF')
+        game = Game.get_instance()
+        game.screen.fill(BLACK)
+        text = game.lg_font.render("Press Esc to re-enter", True, '#FFFFFF')
+        text_rect = text.get_rect(midbottom = game.screen.get_rect().center)
+        game.screen.blit(text, text_rect)
+        text = game.lg_font.render("Press Enter to confirm", True, '#FFFFFF')
         text_rect = text.get_rect(midbottom = text_rect.midtop)
-        Game.get_instance().screen.blit(text, text_rect)
-        game_over_state = Game.get_instance().state_machine.peek_state(GameOverState)
-        Game.get_instance().screen.blit(game_over_state.initials_text, game_over_state.initials_text_rect)
+        game.screen.blit(text, text_rect)
+        game_over_state = game.state_machine.peek_state(GameOverState)
+        game.screen.blit(game_over_state.initials_text, game_over_state.initials_text_rect)
 
     def handle_events(self, event):
         if event.type == pygame.KEYDOWN:
+            game = Game.get_instance()
             if event.key == pygame.K_RETURN:
-                score = Game.get_instance().state_machine.peek_state(GameRunningState).score
-                initials = Game.get_instance().state_machine.peek_state(GameOverState).initials
+                score = game.state_machine.peek_state(GameRunningState).score
+                initials = game.state_machine.peek_state(GameOverState).initials
                 add_highscore(initials, score)
-                Game.get_instance().state_machine.change_state(StartScreen)
+                game.state_machine.change_state(StartScreen)
             elif event.key == pygame.K_ESCAPE:
-                Game.get_instance().state_machine.change_state(GameOverState)
+                game.state_machine.change_state(GameOverState)
 
     
 class GameOverState(GameState):
@@ -118,15 +127,17 @@ class GameOverState(GameState):
         self.initials_text_rect = self.initials_text.get_rect(midtop = Game.get_instance().screen.get_rect().center)
         
     def enter(self):
+        game = Game.get_instance()
+        pygame.display.set_caption(game.caption + " - Game Over")
         self.initials = ""
-        text = Game.get_instance().lg_font.render("Enter Initials", True, '#FFFFFF')
-        text_rect = text.get_rect(midbottom = Game.get_instance().screen.get_rect().center)
-        Game.get_instance().screen.fill((0, 0, 0))
-        Game.get_instance().gameboard.clear()
-        Game.get_instance().screen.blit(text, text_rect)
-        text = Game.get_instance().lg_font.render("Game Over", True, '#FFFFFF')
+        text = game.lg_font.render("Enter Initials", True, '#FFFFFF')
+        text_rect = text.get_rect(midbottom = game.screen.get_rect().center)
+        game.screen.fill((0, 0, 0))
+        game.gameboard.clear()
+        game.screen.blit(text, text_rect)
+        text = game.lg_font.render("Game Over", True, '#FFFFFF')
         text_rect = text.get_rect(midbottom = text_rect.midtop)
-        Game.get_instance().screen.blit(text, text_rect)
+        game.screen.blit(text, text_rect)
 
 
 
@@ -143,13 +154,15 @@ class GameOverState(GameState):
 
 class StartScreen(GameState):
     def enter(self):
-        text = Game.get_instance().lg_font.render("Press SPACE to start", True, '#FFFFFF')
-        text_rect = text.get_rect(midbottom = Game.get_instance().screen.get_rect().center)
-        Game.get_instance().screen.fill("#0000FF")
-        Game.get_instance().screen.blit(text, text_rect)
-        text = Game.get_instance().lg_font.render("Enter for High Scores", True, '#FFFFFF')
-        text_rect = text.get_rect(midtop = Game.get_instance().screen.get_rect().center)
-        Game.get_instance().screen.blit(text, text_rect)
+        game = Game.get_instance()
+        pygame.display.set_caption(game.caption + " - Start Screen")
+        text = game.lg_font.render("Press SPACE to start", True, '#FFFFFF')
+        text_rect = text.get_rect(midbottom = game.screen.get_rect().center)
+        game.screen.fill("#0000FF")
+        game.screen.blit(text, text_rect)
+        text = game.lg_font.render("Enter for High Scores", True, '#FFFFFF')
+        text_rect = text.get_rect(midtop = game.screen.get_rect().center)
+        game.screen.blit(text, text_rect)
 
     def handle_events(self, event):
         if event.type == pygame.KEYDOWN:
@@ -160,7 +173,6 @@ class StartScreen(GameState):
 
 class GameRunningState(GameState):
     def __init__(self):
-        self.header = "Drop Da Blockz"
         # The following properties are not native to state machines, but are necessary for the game to function.
         self.frame_count: int = 0
         self.gravity_timer: float = time()
@@ -172,93 +184,101 @@ class GameRunningState(GameState):
         self.clearedRowCount: int = 0
 
     def enter(self) -> None:
-        Game.get_instance().gameboard.clear()
-        pygame.display.set_caption(self.header)
+        game = Game.get_instance()
+        game.theme_music.play(-1)
+        game.gameboard.clear()
+        pygame.display.set_caption(game.caption + " - Running")
         self.gravity_buffer = 0.5
         self.score = 0
         self.level = 0
         self.clearedRowCount = 0
-        Game.get_instance().screen.fill(DARK_GRAY)
-        Game.get_instance().controller.set_block(Game.get_instance().block_queue.get_next())
+        game.screen.fill(DARK_GRAY)
+        game.controller.set_block(game.block_queue.get_next())
     
     def render(self) -> None:
-        Game.get_instance().gameboard.draw_blocks()
-        Game.get_instance().controller.current_block.draw(Game.get_instance().gameboard)
-        Game.get_instance().controller.current_block.draw_drop_preview(Game.get_instance().gameboard)
-        Game.get_instance().gameboard.draw_grid()
-        Game.get_instance().previewboard.draw_blocks()
-        Game.get_instance().block_queue.draw(Game.get_instance().previewboard)
-        Game.get_instance().previewboard.draw_grid()
-        Game.get_instance().screen.blit(Game.get_instance().gameboard.surface, Game.get_instance().gameboard.rect)
-        Game.get_instance().screen.blit(Game.get_instance().previewboard.surface, Game.get_instance().previewboard.rect)
+        game = Game.get_instance()
+        game.gameboard.draw_blocks()
+        game.controller.current_block.draw(game.gameboard)
+        game.controller.current_block.draw_drop_preview(game.gameboard)
+        game.gameboard.draw_grid()
+        game.previewboard.draw_blocks()
+        game.block_queue.draw(game.previewboard)
+        game.previewboard.draw_grid()
+        game.screen.blit(game.gameboard.surface, game.gameboard.rect)
+        game.screen.blit(game.previewboard.surface, game.previewboard.rect)
 
 
     def update(self) -> None:
         # Handle fast-fall
+        game = Game.get_instance()
         keys: pygame.key.ScancodeWrapper = pygame.key.get_pressed()
         if keys[pygame.K_a] or keys[pygame.K_LEFT]:
             if time() - self.input_timer > self.time_buffer:
-                Game.get_instance().controller.move_block_horizontal(-1)
+                game.controller.move_block_horizontal(-1)
         if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
             if time() - self.input_timer > self.time_buffer:
-                Game.get_instance().controller.move_block_horizontal(1)
+                game.controller.move_block_horizontal(1)
 
-    # Move block down
+        # Move block down
         is_settled = False
         level_adjusted_buffer = max(.05, self.gravity_buffer - self.level/20) # speed up as level increases
         if time() - self.gravity_timer > level_adjusted_buffer:
             print(f"level: {self.level} buffer: {level_adjusted_buffer}")
             self.gravity_timer = time()
             # if self.frame_count % (1 if fast_fall else 10) == 0:
-            if not Game.get_instance().controller.try_move_down():
+            if not game.controller.try_move_down():
                 # Block has settled into place
+                game.plop_sound.play()
                 is_settled = True 
     
 
         if is_settled:                    
             print("Block settled")
-            for i, row in enumerate(Game.get_instance().controller.current_block.rotated_shape()):
+            for i, row in enumerate(game.controller.current_block.rotated_shape()):
                     for j, cell in enumerate(row):
                         if cell:
-                            x, y = Game.get_instance().controller.current_block.x + j, Game.get_instance().controller.current_block.y + i
-                            Game.get_instance().gameboard.unified_grid[y][x] = Game.get_instance().controller.current_block.color
-            full_rows = Game.get_instance().gameboard.find_full_rows()
+                            x, y = game.controller.current_block.x + j, game.controller.current_block.y + i
+                            game.gameboard.unified_grid[y][x] = game.controller.current_block.color
+            full_rows = game.gameboard.find_full_rows()
+            if len(full_rows): game.row_clear_sound.play()
             points = 5 if len(full_rows) == 4 else len(full_rows)
             self.score += points * 10 + points*self.level
             self.clearedRowCount += len(full_rows)
             if self.clearedRowCount >= 10:
                 self.level += 1
                 self.clearedRowCount = self.clearedRowCount % 10 #set full row count back in range
-            Game.get_instance().gameboard.clear_rows(full_rows)
-            Game.get_instance().controller.current_block = Game.get_instance().block_queue.get_next()
-            for i, row in enumerate(Game.get_instance().controller.current_block.rotated_shape()):
+            game.gameboard.clear_rows(full_rows)
+            game.controller.current_block = game.block_queue.get_next()
+            for i, row in enumerate(game.controller.current_block.rotated_shape()):
                     for j, cell in enumerate(row):
                         if cell:
-                            x, y = Game.get_instance().controller.current_block.x + j, Game.get_instance().controller.current_block.y + i
-                            if Game.get_instance().gameboard.unified_grid[y][x] != 0:
+                            x, y = game.controller.current_block.x + j, game.controller.current_block.y + i
+                            if game.gameboard.unified_grid[y][x] != 0:
+                                game.game_over_sound.play()
                                 print("Game Over")
-                                Game.get_instance().state_machine.change_state(GameOverState)
+                                game.state_machine.change_state(GameOverState)
                                 return
 
     def handle_events(self, event: pygame.event.Event) -> None:
         # Function to manage keyboard events.
         if event.type == pygame.KEYDOWN:
+            game = Game.get_instance()
             if event.key == pygame.K_ESCAPE:
-                Game.get_instance().state_machine.enter_sub_state(PauseState)
+                game.state_machine.enter_sub_state(PauseState)
             if event.key == pygame.K_a or event.key == pygame.K_LEFT:
-                Game.get_instance().controller.move_block_horizontal(-1)
+                game.controller.move_block_horizontal(-1)
                 self.input_timer = time()  
 
             if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
-                Game.get_instance().controller.move_block_horizontal(1)
+                game.controller.move_block_horizontal(1)
                 self.input_timer = time()    
                   
             if event.key == pygame.K_UP or event.key == pygame.K_w:
-                Game.get_instance().controller.rotate_block()
+                game.controller.rotate_block()
                 self.input_timer = time()
             
             if event.key == pygame.K_SPACE:
-                Game.get_instance().controller.hard_drop()
+                game.controller.hard_drop()
                 self.gravity_timer = self.gravity_buffer # end cycle immediately
 
             if event.key == pygame.K_s or event.key == pygame.K_DOWN:
@@ -268,23 +288,28 @@ class GameRunningState(GameState):
             if event.key == pygame.K_s or event.key == pygame.K_DOWN:
                 self.gravity_buffer = 0.5
 
+    def exit(self):
+        Game.get_instance().theme_music.stop()
+
 class HighScoreBoard(GameState):
     def enter(self):
-        Game.get_instance().screen.fill(BLACK)
-        text = Game.get_instance().sm_font.render("Esc to exit", True, '#FFFFFF')
-        text_rect = text.get_rect(topleft = Game.get_instance().screen.get_rect().topleft)
-        Game.get_instance().screen.blit(text, text_rect)
-        text = Game.get_instance().lg_font.render("High Scores", True, '#FFFFFF')
-        text_rect = text.get_rect(midtop = Game.get_instance().screen.get_rect().midtop)
-        Game.get_instance().screen.blit(text, text_rect)
+        game = Game.get_instance()
+        pygame.display.set_caption(game.caption + " - High Scores")
+        game.screen.fill(BLACK)
+        text = game.sm_font.render("Esc to exit", True, '#FFFFFF')
+        text_rect = text.get_rect(topleft = game.screen.get_rect().topleft)
+        game.screen.blit(text, text_rect)
+        text = game.lg_font.render("High Scores", True, '#FFFFFF')
+        text_rect = text.get_rect(midtop = game.screen.get_rect().midtop)
+        game.screen.blit(text, text_rect)
         scores = load_highscores()
         text_rect.y += text_rect.h + 25
         text_rect.x -= 50
         for i, entry in enumerate(scores):
             msg = f"{i + 1}. {entry['name']} - {entry['score']}"
-            text = Game.get_instance().mdlg_font.render(msg, True, '#FFFFFF')
+            text = game.mdlg_font.render(msg, True, '#FFFFFF')
             text_rect = text.get_rect(midleft = text_rect.midleft)
-            Game.get_instance().screen.blit(text, text_rect)
+            game.screen.blit(text, text_rect)
             text_rect.y += text_rect.h
 
     def handle_events(self, event):

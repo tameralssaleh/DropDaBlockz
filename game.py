@@ -16,10 +16,19 @@ class Game:
         self.mdlg_font = pygame.font.SysFont("Calibri", 48)
         self.md_font = pygame.font.SysFont("Calibri", 32)
         self.sm_font = pygame.font.SysFont("Calibri", 16)
-        self.y_boundary = (0, 19)
-        self.x_boundary = (0, 9)
+        #self.y_boundary = (0, 19)
+        #self.x_boundary = (0, 9)
+        pygame.mixer.init()
+        self.click_sound = pygame.mixer.Sound("./sounds/click.mp3")
+        self.plop_sound = pygame.mixer.Sound("./sounds/plop.mp3")
+        self.thud_sound = pygame.mixer.Sound("./sounds/thud.mp3")
+        self.woop_sound = pygame.mixer.Sound("./sounds/woop.mp3")
+        self.row_clear_sound = pygame.mixer.Sound("./sounds/rowclear.mp3")
+        self.game_over_sound = pygame.mixer.Sound("./sounds/gameover.mp3")
+        self.theme_music = pygame.mixer.Sound("./sounds/TetrisTheme.mp3")
+        self.theme_music.set_volume(.10)
         self.screen = pygame.display.set_mode((self.width, self.height))
-        pygame.display.set_caption("Drop Da Blockz")
+        self.caption = "Drop Da Blockz"
         self.clock = pygame.time.Clock()
         self.running = True
         if hasattr(Game, "_instance"):
